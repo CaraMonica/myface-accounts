@@ -17,6 +17,7 @@ namespace MyFace.Models.Response
         public string DisplayName => $"{FirstName} {LastName}";
         public string Username => _user.Username;
         public string Email => _user.Email;
+        public string Password => _user.Password;
         public string ProfileImageUrl => _user.ProfileImageUrl;
         public string CoverImageUrl => _user.CoverImageUrl;
     }
