@@ -11,6 +11,7 @@ namespace MyFace.Repositories
         IEnumerable<User> Search(UserSearchRequest search);
         int Count(UserSearchRequest search);
         User GetById(int id);
+        User GetByUsername(string username);
         User Create(CreateUserRequest newUser);
         User Update(int id, UpdateUserRequest update);
         void Delete(int id);
@@ -58,6 +59,12 @@ namespace MyFace.Repositories
                 .Single(user => user.Id == id);
         }
 
+        public User GetByUsername(string username)
+        {
+            return _context.Users
+                .Single(user => user.Username == username);
+        }
+
         public User Create(CreateUserRequest newUser)
         {
             string salt = HashedPasswordGenerator.CreateSalt();
@@ -86,6 +93,7 @@ namespace MyFace.Repositories
             user.LastName = update.LastName;
             user.Username = update.Username;
             user.Email = update.Email;
+            // user.Password = update.Password;
             user.ProfileImageUrl = update.ProfileImageUrl;
             user.CoverImageUrl = update.CoverImageUrl;
 
