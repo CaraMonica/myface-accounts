@@ -2,7 +2,7 @@
 using System.Linq;
 using MyFace.Models.Database;
 using MyFace.Models.Request;
-using MyFace.Services;
+using MyFace.Helpers;
 
 namespace MyFace.Repositories
 {
@@ -67,7 +67,7 @@ namespace MyFace.Repositories
 
         public User Create(CreateUserRequest newUser)
         {
-            string salt = HashedPasswordGenerator.CreateSalt();
+            string salt = HashedPassword.CreateSalt();
 
             var insertResponse = _context.Users.Add(new User
             {
@@ -76,7 +76,7 @@ namespace MyFace.Repositories
                 Email = newUser.Email,
                 Username = newUser.Username,
                 Salt = salt,
-                HashedPassword = HashedPasswordGenerator.GenerateHash(newUser.Password, salt),
+                HashedPassword = HashedPassword.GenerateHash(newUser.Password, salt),
                 ProfileImageUrl = newUser.ProfileImageUrl,
                 CoverImageUrl = newUser.CoverImageUrl,
             });

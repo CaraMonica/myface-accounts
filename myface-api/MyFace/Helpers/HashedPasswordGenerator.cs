@@ -2,15 +2,14 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MyFace.Services
+namespace MyFace.Helpers
 {
-    public static class HashedPasswordGenerator
+    public static class HashedPassword
     {
         private const int SALT_SIZE = 32;
 
         public static string CreateSalt()
         {
-            //Generate a cryptographic random number.
             var rng = new RNGCryptoServiceProvider();
             byte[] buff = new byte[SALT_SIZE];
             rng.GetBytes(buff);

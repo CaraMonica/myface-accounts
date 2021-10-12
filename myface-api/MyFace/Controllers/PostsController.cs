@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
+using MyFace.Helpers;
 using MyFace.Models;
 using MyFace.Models.Request;
 using MyFace.Models.Response;
 using MyFace.Repositories;
-using MyFace.Services;
 
 namespace MyFace.Controllers
 {
@@ -38,32 +40,36 @@ namespace MyFace.Controllers
             return new PostResponse(post);
         }
 
-        public UserAuthentication GetAuthenticationModel(string auth)
+        public bool isValidAuthorization(string authHeader)
         {
-            // TODO checks
-            var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(auth.Remove(0, "Base ".Length)));
+            var authHeaderRegex = new Regex(@"Basic (.*)");
+
+            if (!authHeaderRegex.IsMatch(authHeader))
+                return false;
+
+            var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(authHeader.Remove(0, "Base ".Length)));
             var credentialsList = credentials.Split(':');
-            return new UserAuthentication(credentialsList[0], credentialsList[1]);
+            var authModel = new UserAuthentication(credentialsList[0], credentialsList[1]);
+            var userList = _usersRepo.Search(new UserSearchRequest(authModel.UserName)).ToList();
+
+            if (userList.Count == 0 ||
+            !(HashedPassword.GenerateHash(authModel.Password, userList[0].Salt) == userList[0].HashedPassword))
+                return false;
+
+            return true;
         }
 
         [HttpPost("create")]
-        public IActionResult Create([FromBody] CreatePostRequest newPost, [FromHeader(Name = "Authorization")] string auth)
+        public IActionResult Create([FromBody] CreatePostRequest newPost, [FromHeader(Name = "Authorization")] string authHeader)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var authModel = GetAuthenticationModel(auth);
-            var user = _usersRepo.GetByUsername(authModel.UserName);
+            var post = _posts.Create(newPost);
+            var url = Url.Action("GetById", new { id = post.Id });
+            var postResponse = new PostResponse(post);
 
-            if (HashedPasswordGenerator.GenerateHash(authModel.Password, user.Salt) == user.HashedPassword)
-            {
-                var post = _posts.Create(newPost);
-                var url = Url.Action("GetById", new { id = post.Id });
-                var postResponse = new PostResponse(post);
-                return Created(url, postResponse);
-            }
-
-            return BadRequest();
+            return Created(url, postResponse);
         }
 
         [HttpPatch("{id}/update")]

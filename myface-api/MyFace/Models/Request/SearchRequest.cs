@@ -10,13 +10,14 @@
     public class UserSearchRequest : SearchRequest
     {
         private string _search;
-        
         public string Search
         {
             get => _search?.ToLower();
             set => _search = value;
         }
 
+        public UserSearchRequest(string search) => _search = search;
+        
         public override string Filters => Search == null ? "" : $"&search={Search}";
     }
 
