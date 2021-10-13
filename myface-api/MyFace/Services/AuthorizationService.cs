@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyFace.Models.Request;
 using MyFace.Repositories;
+using MyFace.Helpers;
+using MyFace.Models.Database;
 
 namespace MyFace.Services
 {
@@ -33,13 +35,12 @@ namespace MyFace.Services
             Name = name;
         }
 
+        private IUsersRepo _usersRepo;
         public string AuthenticationType { get; }
-
         public bool IsAuthenticated { get; }
-
         public string Name { get; }
-    }
 
+    }
 
     public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
@@ -53,6 +54,7 @@ namespace MyFace.Services
         {
             _usersRepo = usersRepo;
         }
+
         private IUsersRepo _usersRepo;
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -63,29 +65,19 @@ namespace MyFace.Services
                 return Task.FromResult(AuthenticateResult.Fail("Authorization header missing."));
 
             var authorizationHeader = Request.Headers["Authorization"].ToString();
-            var authHeaderRegex = new Regex(@"Basic (.*)");
+            
+            User user;
+            try
+            {
+                user = AuthorizationHelper.GetUserFromHeader(authorizationHeader, _usersRepo);
+            }
+            catch (ArgumentException e)
+            {
+                return Task.FromResult(AuthenticateResult.Fail(e.Message));
 
-            if (!authHeaderRegex.IsMatch(authorizationHeader))
-                return Task.FromResult(AuthenticateResult.Fail("Authorization code not formatted properly."));
+            }
 
-            var authBase64 =
-            Encoding.UTF8.GetString(
-                Convert.FromBase64String(
-                    authHeaderRegex.Replace(authorizationHeader, "$1")));
-
-            var authSplit = authBase64.Split(Convert.ToChar(':'), 2);
-            var authUsername = authSplit[0];
-            var authPassword = authSplit.Length > 1 ? authSplit[1] : throw new Exception("Unable to get password");
-
-            var user = _usersRepo.GetByUsername(authUsername);
-
-            if (user == null)
-                return Task.FromResult(AuthenticateResult.Fail("Invalid username."));
-
-            if (!(HashedPasswordGenerator.GenerateHash(authPassword, user.Salt) == user.HashedPassword))
-                return Task.FromResult(AuthenticateResult.Fail("Invalid password."));
-
-            var authenticatedUser = new AuthenticatedUser("BasicAuthentication", true, "roundthecode");
+            AuthenticatedUser authenticatedUser =  new AuthenticatedUser("BasicAuthentication", true, user.Username);
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(authenticatedUser));
 
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name)));

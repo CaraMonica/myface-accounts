@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MyFace.Helpers;
 using MyFace.Models.Request;
 using MyFace.Models.Response;
 using MyFace.Repositories;
@@ -12,10 +13,13 @@ namespace MyFace.Controllers
     public class PostsController : ControllerBase
     {    
         private readonly IPostsRepo _posts;
+        private readonly IUsersRepo _usersRepo;
 
-        public PostsController(IPostsRepo posts)
+
+        public PostsController(IPostsRepo posts, IUsersRepo usersRepo)
         {
             _posts = posts;
+            _usersRepo = usersRepo;
         }
         
         [HttpGet("")]
@@ -34,13 +38,16 @@ namespace MyFace.Controllers
         }
 
         [HttpPost("create")]
-        public IActionResult Create([FromBody] CreatePostRequest newPost)
+        public IActionResult Create([FromBody] CreatePostRequest newPost, [FromHeader(Name = "Authorization")] string authHeader)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             
+            var user = AuthorizationHelper.GetUserFromHeader(authHeader, _usersRepo);
+            newPost.UserId = user.Id;
+
             var post = _posts.Create(newPost);
 
             var url = Url.Action("GetById", new { id = post.Id });
