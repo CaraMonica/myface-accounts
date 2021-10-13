@@ -1,14 +1,16 @@
 ﻿import React from "react";
-import { useParams } from 'react-router-dom'; 
+import {useParams} from 'react-router-dom'; 
 import {Page} from "../Page/Page";
 import {UserDetails} from "../../Components/UserDetails/UserDetails";
 import {PostList} from "../../Components/PostList/PostList";
-import {fetchPostsDislikedBy, fetchPostsForUser, fetchPostsLikedBy} from "../../Api/apiClient";
+import {useMyFaceApiFunction} from "../../Api/apiClient";
 import "./Profile.scss";
 import {Users} from "../Users/Users";
 
 export function Profile(): JSX.Element {
-    const {id} = useParams();
+    const {id} = useParams<{id: string}>();
+
+    const { fetchPostsDislikedBy, fetchPostsForUser, fetchPostsLikedBy } = useMyFaceApiFunction();
     
     if (id === undefined) {
         // Shouldn't ever happen - but if the ID is somehow undefined, show the base users page.

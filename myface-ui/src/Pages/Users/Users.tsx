@@ -1,14 +1,16 @@
 ﻿import React, {useState} from "react";
 import {Page} from "../Page/Page";
 import {SearchInput} from "../../Components/SearchInput/SearchInput";
-import {fetchUsers} from "../../Api/apiClient";
+import {useMyFaceApiFunction} from "../../Api/apiClient";
 import {UserCard} from "../../Components/UserCard/UserCard";
 import {InfiniteList} from "../../Components/InfititeList/InfiniteList";
 import "./Users.scss";
 
 export function Users(): JSX.Element {
     const [searchTerm, setSearchTerm] = useState("");
-    
+
+    const { fetchUsers } = useMyFaceApiFunction();
+
     function getUsers(page: number, pageSize: number) {
         return fetchUsers(searchTerm, page, pageSize);
     }

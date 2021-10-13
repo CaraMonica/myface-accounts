@@ -54,6 +54,7 @@ namespace MyFace.Services
             _usersRepo = usersRepo;
         }
         private IUsersRepo _usersRepo;
+
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             Response.Headers.Add("WWW-Authenticate", "Basic");
@@ -76,14 +77,12 @@ namespace MyFace.Services
             var authUsername = authSplit[0];
             var authPassword = authSplit.Length > 1 ? authSplit[1] : throw new Exception("Unable to get password");
 
-            var userSearch = new UserSearchRequest();
-            userSearch.Search = authUsername;
-            var userList = _usersRepo.Search(userSearch).ToList();
+            var user = _usersRepo.GetByUsername(authUsername);
 
-            if (userList.Count == 0)
+            if (user == null)
                 return Task.FromResult(AuthenticateResult.Fail("Invalid username."));
 
-            if (!(HashedPasswordGenerator.GenerateHash(authPassword, userList[0].Salt) == userList[0].HashedPassword))
+            if (!(HashedPasswordGenerator.GenerateHash(authPassword, user.Salt) == user.HashedPassword))
                 return Task.FromResult(AuthenticateResult.Fail("Invalid password."));
 
             var authenticatedUser = new AuthenticatedUser("BasicAuthentication", true, "roundthecode");

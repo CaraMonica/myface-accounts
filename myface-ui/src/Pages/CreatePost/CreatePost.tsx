@@ -1,6 +1,6 @@
 ﻿import React, {FormEvent, useState} from "react";
 import {Page} from "../Page/Page";
-import {createPost} from "../../Api/apiClient";
+import {useMyFaceApiFunction} from "../../Api/apiClient";
 import {Link} from "react-router-dom";
 import "./CreatePost.scss";
 
@@ -11,6 +11,8 @@ export function CreatePostForm(): JSX.Element {
     const [imageUrl, setImageUrl] = useState("");
     const [userId, setUserId] = useState("");
     const [status, setStatus] = useState<FormStatus>("READY");
+
+    const { createPost } = useMyFaceApiFunction();
 
     function submitForm(event: FormEvent) {
         event.preventDefault();

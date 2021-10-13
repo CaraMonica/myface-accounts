@@ -1,5 +1,5 @@
 ﻿import React, {useEffect, useState} from 'react';
-import {fetchUser, User} from "../../Api/apiClient";
+import {useMyFaceApiFunction, User} from "../../Api/apiClient";
 import "./UserDetails.scss";
 
 interface UserDetailsProps {
@@ -9,10 +9,13 @@ interface UserDetailsProps {
 export function UserDetails(props: UserDetailsProps): JSX.Element {
     const [user, setUser] = useState<User | null>(null);
     
+    const { fetchUser } = useMyFaceApiFunction();
+
     useEffect(() => {
         fetchUser(props.userId)
             .then(response => setUser(response));
-    }, [props]);
+        return () => {};
+    }, [props, fetchUser]);
     
     if (!user) {
         return <section>Loading...</section>
@@ -20,7 +23,7 @@ export function UserDetails(props: UserDetailsProps): JSX.Element {
     
     return (
         <section className="user-details">
-            <img className="cover-image" src={user.coverImageUrl} alt="A cover image for the user."/>
+            <img className="cover-image" src={user.coverImageUrl} alt="User cover."/>
             <div className="user-info">
                 <img className="profile-image" src={user.profileImageUrl} alt=""/>
                 <div className="contact-info">

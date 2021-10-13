@@ -13,10 +13,7 @@ namespace MyFace.Controllers
     {
         private readonly IUsersRepo _users;
 
-        public UsersController(IUsersRepo users)
-        {
-            _users = users;
-        }
+        public UsersController(IUsersRepo users) => _users = users;
         
         [HttpGet("")]
         public ActionResult<UserListResponse> Search([FromQuery] UserSearchRequest searchRequest)

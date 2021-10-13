@@ -1,4 +1,7 @@
-﻿export interface ListResponse<T> {
+﻿import { useContext } from "react";
+import { LoginContext } from "../Components/LoginManager/LoginManager";
+
+export interface ListResponse<T> {
     items: T[];
     totalNumberOfItems: number;
     page: number;
@@ -40,46 +43,96 @@ export interface NewPost {
     userId: number;
 }
 
-export async function fetchUsers(searchTerm: string, page: number, pageSize: number): Promise<ListResponse<User>> {
-    const response = await fetch(`https://localhost:5001/users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`);
-    return await response.json();
-}
+const useBasicAuthFetch = () => {
+    const loginContext = useContext(LoginContext);
 
-export async function fetchUser(userId: string | number): Promise<User> {
-    const response = await fetch(`https://localhost:5001/users/${userId}`);
-    return await response.json();
-}
+    const fetchWithBasicAuth: any = async (url: string, init?: any) => {
+        const initWithAuthHeader = {
+            ...init,
+            headers: {
+                ...init?.headers,
+                Authorization: `Basic ${btoa(`${loginContext.username}:${loginContext.password}`)}`,
+            },
+        };
 
-export async function fetchPosts(page: number, pageSize: number): Promise<ListResponse<Post>> {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}`);
-    return await response.json();
-}
+        const response = await fetch(url, initWithAuthHeader);
 
-export async function fetchPostsForUser(page: number, pageSize: number, userId: string | number) {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&postedBy=${userId}`);
-    return await response.json();
-}
+        if (response.status === 401) loginContext.logOut();
 
-export async function fetchPostsLikedBy(page: number, pageSize: number, userId: string | number) {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&likedBy=${userId}`);
-    return await response.json();
-}
+        return response;
+    };
 
-export async function fetchPostsDislikedBy(page: number, pageSize: number, userId: string | number) {
-    const response = await fetch(`https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&dislikedBy=${userId}`);
-    return await response.json();
-}
+    return fetchWithBasicAuth;
+};
 
-export async function createPost(newPost: NewPost) {
-    const response = await fetch(`https://localhost:5001/posts/create`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(newPost),
-    });
-    
-    if (!response.ok) {
-        throw new Error(await response.json())
-    }
-}
+export const useMyFaceApiFunction = () => {
+    const fetchWithBasicAuth = useBasicAuthFetch();
+
+    const fetchUsers = async (
+        searchTerm: string,
+        page: number,
+        pageSize: number
+    ): Promise<ListResponse<User>> => {
+        const response = await fetchWithBasicAuth(
+            `https://localhost:5001/users?search=${searchTerm}&page=${page}&pageSize=${pageSize}`
+        );
+        return await response.json();
+    };
+
+    const fetchUser = async (userId: string | number): Promise<User> => {
+        const response = await fetchWithBasicAuth(`https://localhost:5001/users/${userId}`);
+        return await response.json();
+    };
+
+    const fetchPosts = async (page: number, pageSize: number): Promise<ListResponse<Post>> => {
+        const response = await fetchWithBasicAuth(
+            `https://localhost:5001/feed?page=${page}&pageSize=${pageSize}`
+        );
+        return await response.json();
+    };
+
+    const fetchPostsForUser = async (page: number, pageSize: number, userId: string | number) => {
+        const response = await fetchWithBasicAuth(
+            `https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&postedBy=${userId}`
+        );
+        return await response.json();
+    };
+
+    const fetchPostsLikedBy = async (page: number, pageSize: number, userId: string | number) => {
+        const response = await fetchWithBasicAuth(
+            `https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&likedBy=${userId}`
+        );
+        return await response.json();
+    };
+
+    const fetchPostsDislikedBy = async (page: number, pageSize: number, userId: string | number) => {
+        const response = await fetchWithBasicAuth(
+            `https://localhost:5001/feed?page=${page}&pageSize=${pageSize}&dislikedBy=${userId}`
+        );
+        return await response.json();
+    };
+
+    const createPost = async (newPost: NewPost) => {
+        const response = await fetchWithBasicAuth(`https://localhost:5001/posts/create`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newPost),
+        });
+
+        if (!response.ok) {
+            throw new Error(await response.json());
+        }
+    };
+
+    return {
+        createPost,
+        fetchPostsDislikedBy,
+        fetchPostsLikedBy,
+        fetchPostsForUser,
+        fetchPosts,
+        fetchUser,
+        fetchUsers,
+    };
+};
