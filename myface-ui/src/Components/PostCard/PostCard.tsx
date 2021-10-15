@@ -13,7 +13,18 @@ interface PostCardProps {
 
 export function PostCard(props: PostCardProps): JSX.Element {
     const loginContext = useContext(LoginContext) as ILoginContext;
-    const { createInteraction } = useMyFaceApiFunction();
+    const { createInteraction, deleteInteraction } = useMyFaceApiFunction();
+
+    const hasUserLiked = props.post.likes.filter(i => i.userId === loginContext.userId).length === 1;
+    const onLikeClick = () => createInteraction({userId: loginContext.userId, postId: props.post.id, interactionType: "LIKE"})
+                                .then(post => props.updatePostState(post))
+
+    const hasUserDisliked = props.post.dislikes.filter(i => i.userId === loginContext.userId).length === 1;
+    const onDislikeClick = () => createInteraction({userId: loginContext.userId, postId: props.post.id, interactionType: "DISLIKE"})
+                                .then(post => props.updatePostState(post))
+
+    const onUndoInteraction = () => deleteInteraction({userId: loginContext.userId, postId: props.post.id})
+                                    .then(post => props.updatePostState(post))
 
     return (
         <Card>
@@ -28,20 +39,14 @@ export function PostCard(props: PostCardProps): JSX.Element {
                     <InteractionButton
                         interactionValue={props.post.likes.length}
                         isLikeButton={true}
-                        onClick={() => {
-                            console.log({userId: loginContext.userId, postId: props.post.id, interactionType: "LIKE"})
-                            createInteraction({userId: loginContext.userId, postId: props.post.id, interactionType: "LIKE"})
-                            .then(post => props.updatePostState(post))
-                        }}
-                        hasUserInteracted={props.post.likes.filter(i => i.userId === loginContext.userId).length === 1}
+                        onClick={hasUserLiked ? onUndoInteraction : onLikeClick}
+                        hasUserInteracted={hasUserLiked}
                     />
                     <InteractionButton
                         interactionValue={props.post.dislikes.length}
                         isLikeButton={false}
-                        onClick={() => {
-                            createInteraction({userId: loginContext.userId, postId: props.post.id, interactionType: "DISLIKE"})
-                            .then(post => props.updatePostState(post))}}
-                        hasUserInteracted={props.post.dislikes.filter(i => i.userId === loginContext.userId).length === 1}
+                        onClick={hasUserDisliked ? onUndoInteraction : onDislikeClick}
+                        hasUserInteracted={hasUserDisliked}
                     />
                 </div>
             </div>

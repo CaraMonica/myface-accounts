@@ -22,7 +22,7 @@ namespace MyFace.Controllers
             _interactions = interactions;
             _postsRepo = postsRepo;
         }
-    
+
         [HttpGet("")]
         public ActionResult<ListResponse<InteractionResponse>> Search([FromQuery] SearchRequest search)
         {
@@ -52,6 +52,19 @@ namespace MyFace.Controllers
             var url = Url.Action("GetById", new { id = interaction.Id });
             var post = _postsRepo.GetById(interaction.PostId);
             return Created(url, new FeedPostModel(post));
+        }
+
+        [HttpPost("delete")]
+        public IActionResult Delete([FromBody] CreateInteractionRequest interactionRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _interactions.DeleteByPostId(interactionRequest.PostId, interactionRequest.UserId);
+            var post = _postsRepo.GetById(interactionRequest.PostId);
+            return Ok(new FeedPostModel(post));
         }
 
         [HttpDelete("{id}")]

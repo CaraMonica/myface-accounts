@@ -26,6 +26,11 @@ export interface Interaction {
     interactionType: string;
 }
 
+export interface DeleteInteraction {
+    postId: number;
+    userId: number;
+}
+
 export interface Post {
     id: number;
     message: string;
@@ -140,7 +145,24 @@ export const useMyFaceApiFunction = () => {
         return await response.json();
     };
 
+    const deleteInteraction = async (deleteInteraction: DeleteInteraction) => {
+        const response = await fetchWithBasicAuth(`https://localhost:5001/interactions/delete`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(deleteInteraction),
+        });
+
+        if (!response.ok) {
+            throw new Error(await response.json());
+        }
+
+        return await response.json();
+    };
+
     return {
+        deleteInteraction,
         createInteraction,
         createPost,
         fetchPostsDislikedBy,
