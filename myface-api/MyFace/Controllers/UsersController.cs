@@ -14,7 +14,7 @@ namespace MyFace.Controllers
         private readonly IUsersRepo _users;
 
         public UsersController(IUsersRepo users) => _users = users;
-        
+
         [HttpGet("")]
         public ActionResult<UserListResponse> Search([FromQuery] UserSearchRequest searchRequest)
         {
@@ -37,7 +37,7 @@ namespace MyFace.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
+
             var user = _users.Create(newUser);
 
             var url = Url.Action("GetById", new { id = user.Id });
@@ -56,7 +56,7 @@ namespace MyFace.Controllers
             var user = _users.Update(id, update);
             return new UserResponse(user);
         }
-        
+
         [HttpDelete("{id}")]
         public IActionResult Delete([FromRoute] int id)
         {

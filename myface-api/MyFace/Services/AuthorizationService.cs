@@ -11,10 +11,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MyFace.Models.Request;
-using MyFace.Repositories;
 using MyFace.Helpers;
 using MyFace.Models.Database;
+using MyFace.Models.Request;
+using MyFace.Repositories;
 
 namespace MyFace.Services
 {
@@ -35,7 +35,6 @@ namespace MyFace.Services
             Name = name;
         }
 
-        private IUsersRepo _usersRepo;
         public string AuthenticationType { get; }
         public bool IsAuthenticated { get; }
         public string Name { get; }
@@ -65,7 +64,7 @@ namespace MyFace.Services
                 return Task.FromResult(AuthenticateResult.Fail("Authorization header missing."));
 
             var authorizationHeader = Request.Headers["Authorization"].ToString();
-            
+
             User user;
             try
             {
@@ -77,7 +76,7 @@ namespace MyFace.Services
 
             }
 
-            AuthenticatedUser authenticatedUser =  new AuthenticatedUser("BasicAuthentication", true, user.Username);
+            AuthenticatedUser authenticatedUser = new AuthenticatedUser("BasicAuthentication", true, user.Username);
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(authenticatedUser));
 
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(claimsPrincipal, Scheme.Name)));

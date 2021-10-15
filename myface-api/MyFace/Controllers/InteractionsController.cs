@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
+using MyFace.Helpers;
 using MyFace.Models.Request;
 using MyFace.Models.Response;
 using MyFace.Repositories;
@@ -10,10 +12,15 @@ namespace MyFace.Controllers
     public class InteractionsController : ControllerBase
     {
         private readonly IInteractionsRepo _interactions;
+        private readonly IUsersRepo _usersRepo;
 
-        public InteractionsController(IInteractionsRepo interactions)
+        private readonly IPostsRepo _postsRepo;
+
+        public InteractionsController(IInteractionsRepo interactions, IUsersRepo usersRepo, IPostsRepo postsRepo)
         {
+            _usersRepo = usersRepo;
             _interactions = interactions;
+            _postsRepo = postsRepo;
         }
     
         [HttpGet("")]
@@ -32,18 +39,19 @@ namespace MyFace.Controllers
         }
 
         [HttpPost("create")]
-        public IActionResult Create([FromBody] CreateInteractionRequest newUser)
+        public IActionResult Create([FromBody] CreateInteractionRequest interactionRequest)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-        
-            var interaction = _interactions.Create(newUser);
+
+            _interactions.DeleteByPostId(interactionRequest.PostId, interactionRequest.UserId);
+            var interaction = _interactions.Create(interactionRequest);
 
             var url = Url.Action("GetById", new { id = interaction.Id });
-            var responseViewModel = new InteractionResponse(interaction);
-            return Created(url, responseViewModel);
+            var post = _postsRepo.GetById(interaction.PostId);
+            return Created(url, new FeedPostModel(post));
         }
 
         [HttpDelete("{id}")]

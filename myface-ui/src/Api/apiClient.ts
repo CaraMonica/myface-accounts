@@ -1,5 +1,5 @@
 ﻿import { useContext } from "react";
-import { LoginContext } from "../Components/LoginManager/LoginManager";
+import { ILoginContext, LoginContext } from "../Components/LoginManager/LoginManager";
 
 export interface ListResponse<T> {
     items: T[];
@@ -21,10 +21,9 @@ export interface User {
 }
 
 export interface Interaction {
-    id: number;
-    user: User;
-    type: string;
-    date: string;
+    postId: number;
+    userId: number;
+    interactionType: string;
 }
 
 export interface Post {
@@ -40,11 +39,10 @@ export interface Post {
 export interface NewPost {
     message: string;
     imageUrl: string;
-    userId: number;
 }
 
 const useBasicAuthFetch = () => {
-    const loginContext = useContext(LoginContext);
+    const loginContext = useContext(LoginContext) as ILoginContext;
 
     const fetchWithBasicAuth: any = async (url: string, init?: any) => {
         const initWithAuthHeader = {
@@ -126,7 +124,24 @@ export const useMyFaceApiFunction = () => {
         }
     };
 
+    const createInteraction = async (newInteraction: Interaction) => {
+        const response = await fetchWithBasicAuth(`https://localhost:5001/interactions/create`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newInteraction),
+        });
+
+        if (!response.ok) {
+            throw new Error(await response.json());
+        }
+
+        return await response.json();
+    };
+
     return {
+        createInteraction,
         createPost,
         fetchPostsDislikedBy,
         fetchPostsLikedBy,
@@ -135,4 +150,21 @@ export const useMyFaceApiFunction = () => {
         fetchUser,
         fetchUsers,
     };
+};
+
+export const login = async (username: string, password: string) => {
+    const response = await fetch(`https://localhost:5001/login`, {
+        headers: {
+            Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+        },
+    });
+
+    if (!response.ok) 
+    {
+        throw new Error(await response.json());
+    }
+
+    const json = await response.json();
+    console.log(json)
+    return json;
 };

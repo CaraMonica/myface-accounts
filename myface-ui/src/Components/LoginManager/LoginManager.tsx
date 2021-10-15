@@ -1,15 +1,19 @@
 ﻿import React, {createContext, ReactNode, useState} from "react";
 
-export const LoginContext = createContext({
-    isLoggedIn: false,
-    isAdmin: false,
-    username: "",
-    setUsername: (username: string) => {},
-    password: "",
-    setPassword: (password: string) => {},
-    logIn: () => {},
-    logOut: () => {},
-});
+export interface ILoginContext {
+    isLoggedIn: boolean,
+    isAdmin: boolean,
+    username: string,
+    setUsername: Function,
+    password: string,
+    setPassword: Function,
+    userId: number,
+    setUserId: Function,
+    logIn: Function,
+    logOut: Function,
+};
+
+export const LoginContext = createContext<ILoginContext | null>(null);
 
 interface LoginManagerProps {
     children: ReactNode
@@ -18,6 +22,7 @@ interface LoginManagerProps {
 export function LoginManager(props: LoginManagerProps): JSX.Element {
     const [loggedIn, setLoggedIn] = useState(false);
     const [username, setUsername] = useState("");
+    const [userId, setUserId] = useState(-1);
     const [password, setPassword] = useState("");
 
     
@@ -36,6 +41,8 @@ export function LoginManager(props: LoginManagerProps): JSX.Element {
         setUsername: setUsername,
         password: password,
         setPassword: setPassword,
+        userId: userId,
+        setUserId: setUserId,
         logIn: logIn,
         logOut: logOut,
     };

@@ -5,13 +5,13 @@ import {Feed} from "../Pages/Feed/Feed";
 import {Users} from "../Pages/Users/Users";
 import {NotFound} from "../Pages/NotFound/NotFound";
 import {Login} from "../Pages/Login/Login";
-import {LoginContext, LoginManager} from "../Components/LoginManager/LoginManager";
+import {ILoginContext, LoginContext, LoginManager} from "../Components/LoginManager/LoginManager";
 import {Profile} from "../Pages/Profile/Profile";
 import {CreatePost} from "../Pages/CreatePost/CreatePost";
 
 
 function Routes(): ReactElement {
-    const loginContext = useContext(LoginContext);
+    const loginContext = useContext(LoginContext) as ILoginContext;
     
     if (!loginContext.isLoggedIn) {
         return <Login/>

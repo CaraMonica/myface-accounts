@@ -41,4 +41,53 @@
     @include labelFont;
     padding: 0 $spacing-medium;
   }
+
+  .interaction-btn-container {
+    display: flex;
+    justify-content: space-evenly;
+    width: 40%;
+    position: relative;
+    left: 30%;
+  }
+
+  .interaction-btn-container button {
+    border: none;
+    cursor: pointer;
+    float: left;
+    padding: 0 20px;
+  }
+
+  .interaction-value {
+    color: grey;
+    font-weight: bold;
+    font-size: 95%;
+  }
+
+  .like {
+    color: rgba(0, 0, 255, 0.514);
+  }
+
+  .dislike {
+    color: #ff000081;
+  }
+
+  .like:hover {
+    color: rgb(4, 4, 224);
+  }
+
+  .dislike:hover {
+    color: #da3e00;
+  }
+
+  .disliked {
+    color: #da3e00;
+  }
+
+  .liked {
+    color: rgb(4, 4, 224);
+  }
+
+  .disliked:hover, .liked:hover {
+    color: grey;
+  }
 }

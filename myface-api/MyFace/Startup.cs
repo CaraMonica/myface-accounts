@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -29,11 +30,11 @@ namespace MyFace
             services
                 .AddAuthentication()
                 .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", options => { });
-            
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("BasicAuthentication", new AuthorizationPolicyBuilder("BasicAuthentication").RequireAuthenticatedUser().Build());
-            });      
+            });
 
             services.AddDbContext<MyFaceDbContext>(options =>
             {
@@ -50,7 +51,10 @@ namespace MyFace
                         .AllowAnyHeader());
             });
 
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(opt =>
+            {
+                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            }); ;
 
             services.AddTransient<IInteractionsRepo, InteractionsRepo>();
             services.AddTransient<IPostsRepo, PostsRepo>();
@@ -77,7 +81,7 @@ namespace MyFace
             app.UseCors(CORS_POLICY_NAME);
 
             app.UseAuthorization();
-            
+
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }

@@ -1,4 +1,5 @@
-﻿using MyFace.Models.Database;
+﻿using System;
+using MyFace.Models.Database;
 
 namespace MyFace.Models.Response
 {
@@ -8,7 +9,7 @@ namespace MyFace.Models.Response
 
         public UserResponse(User user)
         {
-            _user = user;
+            _user = user ?? throw new ArgumentNullException(nameof(user));
         }
 
         public int Id => _user.Id;

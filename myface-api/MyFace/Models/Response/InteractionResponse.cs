@@ -13,6 +13,13 @@ namespace MyFace.Models.Response
             _interaction = interaction;
         }
 
+        public InteractionResponse(Interaction interaction, Post post)
+        {
+            _interaction = interaction;
+            Post = post;
+        }
+
+        public Post Post { get; set; }
         public int Id => _interaction.Id;
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public InteractionType Type => _interaction.Type;

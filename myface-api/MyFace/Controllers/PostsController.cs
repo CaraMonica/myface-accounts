@@ -11,17 +11,16 @@ namespace MyFace.Controllers
     [ApiController]
     [Route("/posts")]
     public class PostsController : ControllerBase
-    {    
+    {
         private readonly IPostsRepo _posts;
         private readonly IUsersRepo _usersRepo;
-
 
         public PostsController(IPostsRepo posts, IUsersRepo usersRepo)
         {
             _posts = posts;
             _usersRepo = usersRepo;
         }
-        
+
         [HttpGet("")]
         public ActionResult<PostListResponse> Search([FromQuery] PostSearchRequest searchRequest)
         {
@@ -44,7 +43,7 @@ namespace MyFace.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
+
             var user = AuthorizationHelper.GetUserFromHeader(authHeader, _usersRepo);
             newPost.UserId = user.Id;
 

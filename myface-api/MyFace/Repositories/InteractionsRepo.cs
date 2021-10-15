@@ -11,10 +11,13 @@ namespace MyFace.Repositories
         IEnumerable<Interaction> Search(SearchRequest search);
         int Count(SearchRequest search);
         Interaction GetById(int id);
+        Interaction Get(int postId, int userId);
         Interaction Create(CreateInteractionRequest create);
         void Delete(int id);
+        void DeleteByPostId(int postId, int userId);
+
     }
-    
+
     public class InteractionsRepo : IInteractionsRepo
     {
         private readonly MyFaceDbContext _context;
@@ -23,7 +26,7 @@ namespace MyFace.Repositories
         {
             _context = context;
         }
-        
+
         public IEnumerable<Interaction> Search(SearchRequest search)
         {
             return _context.Interactions
@@ -39,6 +42,11 @@ namespace MyFace.Repositories
         public Interaction GetById(int id)
         {
             return _context.Interactions.Single(i => i.Id == id);
+        }
+
+        public Interaction Get(int postId, int userId)
+        {
+            return _context.Interactions.Single(i => i.PostId == postId && i.UserId == userId);
         }
 
         public Interaction Create(CreateInteractionRequest create)
@@ -58,6 +66,13 @@ namespace MyFace.Repositories
         {
             var interaction = GetById(id);
             _context.Interactions.Remove(interaction);
+            _context.SaveChanges();
+        }
+
+        public void DeleteByPostId(int postId, int userId)
+        {
+            var interactions = _context.Interactions.Where(i => i.UserId == userId && i.PostId == postId);
+            _context.Interactions.RemoveRange(interactions);
             _context.SaveChanges();
         }
     }

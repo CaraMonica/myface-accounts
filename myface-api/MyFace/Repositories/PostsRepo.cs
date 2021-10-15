@@ -18,7 +18,7 @@ namespace MyFace.Repositories
         Post Update(int id, UpdatePostRequest update);
         void Delete(int id);
     }
-    
+
     public class PostsRepo : IPostsRepo
     {
         private readonly MyFaceDbContext _context;
@@ -27,7 +27,7 @@ namespace MyFace.Repositories
         {
             _context = context;
         }
-        
+
         public IEnumerable<Post> Search(PostSearchRequest search)
         {
             return _context.Posts
@@ -36,7 +36,7 @@ namespace MyFace.Repositories
                 .Skip((search.Page - 1) * search.PageSize)
                 .Take(search.PageSize);
         }
-        
+
         public IEnumerable<Post> SearchFeed(FeedSearchRequest search)
         {
             return _context.Posts
@@ -70,6 +70,8 @@ namespace MyFace.Repositories
         public Post GetById(int id)
         {
             return _context.Posts
+                .Include(p => p.User)
+                .Include(p => p.Interactions).ThenInclude(i => i.User)
                 .Single(post => post.Id == id);
         }
 
@@ -95,7 +97,7 @@ namespace MyFace.Repositories
 
             _context.Posts.Update(post);
             _context.SaveChanges();
-            
+
             return post;
         }
 

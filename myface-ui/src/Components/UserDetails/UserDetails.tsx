@@ -15,7 +15,7 @@ export function UserDetails(props: UserDetailsProps): JSX.Element {
         fetchUser(props.userId)
             .then(response => setUser(response));
         return () => {};
-    }, [props, fetchUser]);
+    }, [props.userId]);
     
     if (!user) {
         return <section>Loading...</section>

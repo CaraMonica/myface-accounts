@@ -12,7 +12,7 @@ export function Feed(): JSX.Element {
     return (
         <Page containerClassName={"feed"}>
             <h1 className="title">Feed</h1>
-            <InfiniteList fetchItems={fetchPosts} renderItem={post => <PostCard key={post.id} post={post}/>}/>
+            <InfiniteList fetchItems={fetchPosts} renderItem={(post, props) => <PostCard key={post.id} post={post} {...props}/>}/>
             <Link className="create-post" to="/new-post">+</Link>
         </Page>
     );
